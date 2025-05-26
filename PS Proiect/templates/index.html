@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+	<head>
+
+		<meta charset="UTF-8">
+		<title>Syncretic Project</title>
+		<style>
+			.onButton {
+				width: 50px;
+				height: 50px;
+			}
+			.offButton {
+				width: 50px;
+				height: 50px;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Left Side -->
+		<div style="width: 50%; height: 550px; float:left;">
+			<!-- Led Control -->
+			<div class='LED-Control'>
+				<h2>Control LED</h2>
+				<div class='LED-Buttons'>
+					<form action='#' method='POST'>
+						<button class='onButton' onclick="ledOn()" name="on" value="on">On</button>
+						<button class='offButton' onclick="ledOff()" name="off" value="off">Off</button>
+					</form>
+				</div>
+			</div>
+
+				<!-- LED Status -->
+			<div>
+				<h2>Status LED: </h2>
+				<p>{{led_status}}</p>
+			</div>
+
+				<!-- Temp sensor -->
+			<div>
+				<h2>Temperature & Humidity</h2>
+				<p>Temperature: <span id="temp">{{temp}}</span></p>
+				<p>Humidity: <span id="hum">{{hum}}</span></p>
+			</div>
+
+				<!-- Message Input -->
+			<div>
+				<h2>Write message:</h2>
+				<form action="#" method="POST">
+					<input type="text" name="message" id="messageInput">
+					<button type="submit">Save message</button>
+				</form>
+			</div>
+
+			<script>
+				function sendMessage() {
+					var message = document.getElementById('messageInput').value;
+					fetch('/save_message', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({ message: message })
+					})
+					.then(response => {
+						if (response.ok) {
+							console.log('Message saved successfully');
+						} else {
+							console.error('Failed to save message');
+						}
+					})
+					.catch(error => {
+						console.error('Error:', error);
+					});
+				}
+			</script>
+
+				<!-- Display Messages -->
+			<div>
+				<h2>Messages:</h2>
+				<ul>
+					{% for message in messages %}
+					<li>{{ message }}</li>
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
+
+		<!-- Right Side -->
+        <div style="width:100%; height: 300px;">
+
+			<!-- Flood archive -->
+			<div>
+				<h2>Flood</h2>
+				<p><span id="flood_event">{{flood_event}}</span></p>
+
+			</div>
+        </div>
+
+	<script>
+		function fetchData() {
+			fetch('/get_data')
+				.then(response => response.json())
+				.then(data => {
+					document.getElementById('temp').innerText = data.temp;
+					document.getElementById('hum').innerText = data.hum;
+					document.getElementById('flood_event').innerText = data.flood_event;
+				})
+				.catch(error => {
+					console.error('Error fetching data:', error);
+				});
+		}
+
+		// Fetch data every 5 seconds
+		setInterval(fetchData, 5000);
+
+		// Initial fetch when the page loads
+		fetchData();
+	</script>
+
+	</body>
+</html>

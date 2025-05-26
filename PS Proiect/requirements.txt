@@ -1,0 +1,3 @@
+Flask==2.x
+pyserial==3.x
+gunicorn
